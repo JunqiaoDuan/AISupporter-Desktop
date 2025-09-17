@@ -35,7 +35,8 @@ namespace AISupporter.App.Configurations
                 {
                     EndPoint = openAIendpoint,
                     SecretKey = openAISecretKey
-                })
+                },
+                configuration)
             );
 
             #endregion

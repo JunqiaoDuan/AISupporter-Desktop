@@ -1,6 +1,8 @@
 ﻿using AISupporter.ExternalService.AI.Converter;
 using AISupporter.ExternalService.AI.Interfaces;
+using AISupporter.ExternalService.AI.Interfaces.Enum;
 using AISupporter.ExternalService.AI.Interfaces.Model;
+using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
 using System;
@@ -16,11 +18,13 @@ namespace AISupporter.ExternalService.AI.OpenAI
     {
         private AIServiceContext _context;
         private OpenAIChatMessageConverter _chatMessageConverter;
+        private readonly string _systemPrompt;
 
-        public OpenAIService(AIServiceContext context)
+        public OpenAIService(AIServiceContext context, IConfiguration configuration)
         {
             _context = context;
             _chatMessageConverter = new OpenAIChatMessageConverter();
+            _systemPrompt = configuration["OpenAI:AISystemPrompt"] ?? string.Empty;
         }
 
         public void Test()
@@ -72,6 +76,12 @@ namespace AISupporter.ExternalService.AI.OpenAI
 
         public async Task ChatAsync(List<AIChatMessage> messages, string modelCode)
         {
+            // Prepend the system prompt as the first message
+            if (!messages.Any() || messages.First().Role != AIChatMessageRole.System)
+            {
+                messages.Insert(0, AIChatMessage.CreateSystemMessage(_systemPrompt));
+            }
+
             var _secretKey = _context.SecretKey;
             var _endpoint = _context.EndPoint;
 

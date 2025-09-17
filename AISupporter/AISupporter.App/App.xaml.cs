@@ -24,7 +24,7 @@ namespace AISupporter.App
         {
             var services = new ServiceCollection();
 
-            #region Config
+            #region Refister Config File
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
