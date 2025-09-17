@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISupporter.App", "AISupporter.App\AISupporter.App.csproj", "{87D34EF9-FB3D-48DF-96DC-566967E1EF2E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISupporter.ExternalService.AI", "AISupporter.ExternalService.AI\AISupporter.ExternalService.AI.csproj", "{0B3671E4-65DB-403B-9633-3944DEB19055}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{87D34EF9-FB3D-48DF-96DC-566967E1EF2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87D34EF9-FB3D-48DF-96DC-566967E1EF2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87D34EF9-FB3D-48DF-96DC-566967E1EF2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B3671E4-65DB-403B-9633-3944DEB19055}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B3671E4-65DB-403B-9633-3944DEB19055}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B3671E4-65DB-403B-9633-3944DEB19055}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B3671E4-65DB-403B-9633-3944DEB19055}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
