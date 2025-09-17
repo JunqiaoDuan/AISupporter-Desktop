@@ -44,29 +44,22 @@ namespace AISupporter.ExternalService.AI.OpenAI
         {
             try
             {
-                if (!File.Exists(imagePath))
+                var imageResult = ProcessImage(imagePath);
+                if (imageResult == null)
                 {
                     Console.WriteLine($"Image file not found: {imagePath}");
                     return;
                 }
 
-                byte[] imageBytes = File.ReadAllBytes(imagePath);
-                string mimeType = Path.GetExtension(imagePath).ToLower() switch
-                {
-                    ".png" => "image/png",
-                    ".jpg" or ".jpeg" => "image/jpeg",
-                    ".gif" => "image/gif",
-                    ".webp" => "image/webp",
-                    _ => "image/png"
-                };
+                var (imageBytes, mimeType) = imageResult.Value;
 
                 var messages = new List<ChatMessage>
-                {
-                    ChatMessage.CreateUserMessage(
-                        ChatMessageContentPart.CreateTextPart("Describe this image in detail."),
-                        ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mimeType)
-                    )
-                };
+        {
+            ChatMessage.CreateUserMessage(
+                ChatMessageContentPart.CreateTextPart("Describe this image in detail."),
+                ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mimeType)
+            )
+        };
 
                 ChatCompletion completion = chatClient.CompleteChat(messages);
                 Console.WriteLine($"[ASSISTANT]: {completion.Content[0].Text}");
@@ -91,13 +84,47 @@ namespace AISupporter.ExternalService.AI.OpenAI
               }
             );
 
-            var openAIMessges = _chatMessageConverter.ConvertToModelFormat(messages);
-            ChatCompletion completion = await chatClient.CompleteChatAsync(openAIMessges);
+            var openAIMessages = _chatMessageConverter.ConvertToModelFormat(messages);
 
+            var lastMessage = messages.LastOrDefault();
+            if (lastMessage?.HasImage == true)
+            {
+                var imageResult = ProcessImage(lastMessage.ImagePath);
+                if (imageResult != null)
+                {
+                    var (imageBytes, mimeType) = imageResult.Value;
+                    var lastOpenAIMessage = openAIMessages.Last();
+                    openAIMessages.RemoveAt(openAIMessages.Count - 1);
+
+                    var messageWithImage = ChatMessage.CreateUserMessage(
+                        ChatMessageContentPart.CreateTextPart(lastMessage.Content),
+                        ChatMessageContentPart.CreateImagePart(BinaryData.FromBytes(imageBytes), mimeType)
+                    );
+
+                    openAIMessages.Add(messageWithImage);
+                }
+            }
+
+            ChatCompletion completion = await chatClient.CompleteChatAsync(openAIMessages);
             var newMessage = completion.Content[0].Text;
             messages.Add(AIChatMessage.CreateAssistantMessage(newMessage));
-
         }
 
+        private (byte[] ImageBytes, string MimeType)? ProcessImage(string? imagePath)
+        {
+            if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath))
+                return null;
+
+            byte[] imageBytes = File.ReadAllBytes(imagePath);
+            string mimeType = Path.GetExtension(imagePath).ToLower() switch
+            {
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                _ => "image/png"
+            };
+            return (imageBytes, mimeType);
+        }
     }
 }

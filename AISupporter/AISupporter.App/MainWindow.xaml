@@ -4,18 +4,137 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AISupporter.App"
+        xmlns:localConverters="clr-namespace:AISupporter.App.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <StackPanel Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10">
-            <Button Content="Start" Width="100" Height="30" Margin="0,0,0,10"/>
+        Title="AI Supporter" Height="800" Width="600">
 
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10">
-                <Button Content="Capture" Width="100" Height="30" Command="{Binding CaptureCommand}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10">
-                <Button Content="AI Test" Width="100" Height="30" Command="{Binding AICommand}" Margin="0,0,0,10"/>
-            </StackPanel>
-        </StackPanel>
+    <Window.Resources>
+        
+        <!-- Converters -->
+        <localConverters:MessageAlignmentConverter x:Key="MessageAlignmentConverter"/>
+        <localConverters:MessageBackgroundConverter x:Key="MessageBackgroundConverter"/>
+        <localConverters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+
+        <!-- Chat message template -->
+        <DataTemplate x:Key="ChatMessageTemplate">
+            <Border Margin="10,5" 
+                Padding="12,8" 
+                CornerRadius="12"
+                MaxWidth="600"
+                HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
+                Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
+                <StackPanel>
+                    <!-- Message header -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBlock Text="{Binding Role}" 
+                               FontWeight="Bold" 
+                               FontSize="11" 
+                               Opacity="0.7"/>
+                        <TextBlock Text="{Binding ChatTime, StringFormat='HH:mm:ss'}" 
+                               FontSize="10" 
+                               Opacity="0.5" 
+                               Margin="10,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Message content -->
+                    <TextBlock Text="{Binding Content}" 
+                           TextWrapping="Wrap" 
+                           FontSize="13"
+                           LineHeight="18"/>
+
+                    <!-- Image if present -->
+                    <Image Source="{Binding ImagePath}" 
+                       MaxWidth="400" 
+                       MaxHeight="300" 
+                       Margin="0,8,0,0"
+                       Stretch="Uniform">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasImage}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Chat Messages Container -->
+        <Border Grid.Row="1" Background="#fafafa">
+            <ScrollViewer x:Name="ChatScrollViewer" 
+                          VerticalScrollBarVisibility="Auto" 
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,10">
+                <ItemsControl ItemsSource="{Binding Messages}" 
+                              ItemTemplate="{StaticResource ChatMessageTemplate}"/>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Input Area -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#ddd" BorderThickness="0,1,0,0">
+            <Grid Margin="15,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" 
+                         Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MaxHeight="120"
+                         MinHeight="36"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Center"
+                         Padding="12,8"
+                         FontSize="13"
+                         BorderBrush="#ddd"
+                         BorderThickness="1"
+                         Background="#f9f9f9">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" 
+                                   Modifiers="Ctrl" 
+                                   Command="{Binding SendMessageCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <Button Grid.Column="1" 
+                        Content="📤 Send" 
+                        Command="{Binding SendMessageCommand}"
+                        Padding="16,8"
+                        Margin="10,0,0,0"
+                        Background="#2196F3"
+                        Foreground="White"
+                        BorderBrush="#2196F3"
+                        FontWeight="SemiBold"
+                        IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Opacity" Value="1"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSending}" Value="True">
+                                    <Setter Property="Content" Value="⏳ Sending..."/>
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
     </Grid>
+
 </Window>

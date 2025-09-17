@@ -15,12 +15,14 @@ namespace AISupporter.ExternalService.AI.Interfaces.Model
         public Dictionary<string, object>? Metadata { get; private set; }
         public DateTime ChatTime { get; private set; }
         public string? Model { get; private set; }
+        public string? ImagePath { get; private set; }
 
-        public AIChatMessage(AIChatMessageRole role, string content, string? name = null)
+        public AIChatMessage(AIChatMessageRole role, string content, string? name = null, string? imagePath = null)
         {
             Role = role;
             Content = content;
             Name = name;
+            ImagePath = imagePath;
             ChatTime = DateTime.UtcNow;
             Metadata = new Dictionary<string, object>();
         }
@@ -30,9 +32,9 @@ namespace AISupporter.ExternalService.AI.Interfaces.Model
             return new AIChatMessage(AIChatMessageRole.System, content);
         }
 
-        public static AIChatMessage CreateUserMessage(string content)
+        public static AIChatMessage CreateUserMessage(string content, string? imagePath = null)
         {
-            return new AIChatMessage(AIChatMessageRole.User, content);
+            return new AIChatMessage(AIChatMessageRole.User, content, imagePath: imagePath);
         }
 
         public static AIChatMessage CreateAssistantMessage(string content, string? model = null)
@@ -43,5 +45,6 @@ namespace AISupporter.ExternalService.AI.Interfaces.Model
             };
         }
 
+        public bool HasImage => !string.IsNullOrEmpty(ImagePath);
     }
 }
