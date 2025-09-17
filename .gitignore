@@ -403,3 +403,5 @@ FodyWeavers.xsd
 # Ignore publish profile
 **/Properties/ServiceDependencies/**/*.json
 
+appsettings.json
+!appsettings.template.json
