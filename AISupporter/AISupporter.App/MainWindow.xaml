@@ -16,52 +16,60 @@
         <localConverters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
 
         <!-- Chat message template -->
+        <!-- Chat message template -->
         <DataTemplate x:Key="ChatMessageTemplate">
             <Border Margin="10,5" 
-                Padding="12,8" 
-                CornerRadius="12"
-                MaxWidth="600"
-                HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
-                Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
+                    Padding="12,8" 
+                    CornerRadius="12"
+                    MaxWidth="600"
+                    HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
+                    Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
                 <StackPanel>
                     <!-- Message header -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                         <TextBlock Text="{Binding Role}" 
-                               FontWeight="Bold" 
-                               FontSize="11" 
-                               Opacity="0.7"/>
+                                   FontWeight="Bold" 
+                                   FontSize="11" 
+                                   Opacity="0.7"/>
+                        <!-- Small screenshot icon after text -->
+                        <Button Background="Transparent" BorderThickness="0" Padding="2"
+                                ToolTip="Click to view screenshot"
+                                Click="ScreenshotIcon_Click"
+                                Margin="0,0,0,0"
+                                VerticalAlignment="Center">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasImage}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Image Width="16" Height="16"
+                                    Source="pack://application:,,,/Resources/Images/screenshot.png"
+                                    Stretch="Uniform"/>
+                        </Button>
                         <TextBlock Text="{Binding ChatTime, StringFormat='HH:mm:ss'}" 
-                               FontSize="10" 
-                               Opacity="0.5" 
-                               Margin="10,0,0,0"/>
+                                   FontSize="10" 
+                                   Opacity="0.5" 
+                                   Margin="10,0,0,0"/>
                     </StackPanel>
 
-                    <!-- Message content -->
-                    <TextBlock Text="{Binding Content}" 
-                           TextWrapping="Wrap" 
-                           FontSize="13"
-                           LineHeight="18"/>
+                    <!-- Message content with inline image icon -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Content}" 
+                                   TextWrapping="Wrap" 
+                                   FontSize="13"
+                                   LineHeight="18"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
 
-                    <!-- Image if present -->
-                    <Image Source="{Binding ImagePath}" 
-                       MaxWidth="400" 
-                       MaxHeight="300" 
-                       Margin="0,8,0,0"
-                       Stretch="Uniform">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasImage}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
                 </StackPanel>
             </Border>
         </DataTemplate>
+
     </Window.Resources>
 
     <Grid>

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Images\screenshot.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Views\" />
   </ItemGroup>
@@ -22,6 +26,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AISupporter.ExternalService.AI\AISupporter.ExternalService.AI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\screenshot.png" />
   </ItemGroup>
 
   <ItemGroup>
