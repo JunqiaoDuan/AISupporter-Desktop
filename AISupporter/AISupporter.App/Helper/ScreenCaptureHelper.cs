@@ -12,6 +12,9 @@ namespace AISupporter.App.Helper
         #region Constants
 
         private const int SRCCOPY = 0x00CC0020;
+        private const uint EDD_GET_DEVICE_INTERFACE_NAME = 0x00000001;
+        private const uint DISPLAY_DEVICE_ATTACHED_TO_DESKTOP = 0x00000001;
+        private const uint DISPLAY_DEVICE_PRIMARY_DEVICE = 0x00000004;
 
         #endregion
 
@@ -33,6 +36,30 @@ namespace AISupporter.App.Helper
             public RECT rcMonitor;
             public RECT rcWork;
             public uint dwFlags;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct DISPLAY_DEVICE
+        {
+            [MarshalAs(UnmanagedType.U4)]
+            public int cb;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string DeviceName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceString;
+            [MarshalAs(UnmanagedType.U4)]
+            public uint StateFlags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceID;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceKey;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
         }
 
         #endregion
@@ -82,12 +109,8 @@ namespace AISupporter.App.Helper
         [DllImport("user32.dll")]
         private static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            public int X;
-            public int Y;
-        }
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool EnumDisplayDevices(string? lpDevice, uint iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
 
         #endregion
 
@@ -96,7 +119,7 @@ namespace AISupporter.App.Helper
         public class ScreenInfo
         {
             public int Index { get; set; }
-            public string DeviceName { get; set; }
+            public string DeviceName { get; set; } = string.Empty;
             public Rectangle Bounds { get; set; }
             public Rectangle WorkingArea { get; set; }
             public bool IsPrimary { get; set; }
@@ -104,8 +127,7 @@ namespace AISupporter.App.Helper
 
             public override string ToString()
             {
-                return $"Screen {Index}: {Bounds.Width}x{Bounds.Height} at ({Bounds.X}, {Bounds.Y})" +
-                       (IsPrimary ? " [Primary]" : "");
+                return DeviceName;
             }
         }
 
@@ -147,6 +169,7 @@ namespace AISupporter.App.Helper
         public static List<ScreenInfo> GetAllScreenInfo()
         {
             var screens = new List<ScreenInfo>();
+            var displayNames = GetDisplayNames();
             int screenIndex = 0;
 
             MonitorEnumDelegate callback = (IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData) =>
@@ -156,15 +179,37 @@ namespace AISupporter.App.Helper
 
                 if (GetMonitorInfo(hMonitor, ref monitorInfo))
                 {
+                    var width = monitorInfo.rcMonitor.Right - monitorInfo.rcMonitor.Left;
+                    var height = monitorInfo.rcMonitor.Bottom - monitorInfo.rcMonitor.Top;
+                    var isPrimary = (monitorInfo.dwFlags & 1) == 1;
+
+                    // Get the display name from our dictionary
+                    string displayName = "Generic Monitor";
+                    var deviceKeys = displayNames.Keys.ToArray();
+                    if (screenIndex < deviceKeys.Length)
+                    {
+                        displayName = displayNames[deviceKeys[screenIndex]];
+                    }
+
+                    // Clean up the display name
+                    displayName = CleanDisplayName(displayName);
+
+                    // Format like OBS: "Monitor Name: 1920x1080 @0,0 (Primary Monitor)"
+                    string deviceName = $"{displayName}: {width}x{height} @{monitorInfo.rcMonitor.Left},{monitorInfo.rcMonitor.Top}";
+                    if (isPrimary)
+                    {
+                        deviceName += " (Primary Monitor)";
+                    }
+
                     var screen = new ScreenInfo
                     {
                         Index = screenIndex++,
-                        DeviceName = $"Display{screenIndex}",
+                        DeviceName = deviceName,
                         Bounds = new Rectangle(
                             monitorInfo.rcMonitor.Left,
                             monitorInfo.rcMonitor.Top,
-                            monitorInfo.rcMonitor.Right - monitorInfo.rcMonitor.Left,
-                            monitorInfo.rcMonitor.Bottom - monitorInfo.rcMonitor.Top
+                            width,
+                            height
                         ),
                         WorkingArea = new Rectangle(
                             monitorInfo.rcWork.Left,
@@ -172,7 +217,7 @@ namespace AISupporter.App.Helper
                             monitorInfo.rcWork.Right - monitorInfo.rcWork.Left,
                             monitorInfo.rcWork.Bottom - monitorInfo.rcWork.Top
                         ),
-                        IsPrimary = (monitorInfo.dwFlags & 1) == 1, // MONITORINFOF_PRIMARY = 1
+                        IsPrimary = isPrimary,
                         MonitorHandle = hMonitor
                     };
 
@@ -242,9 +287,9 @@ namespace AISupporter.App.Helper
         /// </summary>
         /// <param name="filePath">Path where to save the screenshot</param>
         /// <param name="format">Image format (PNG, JPEG, etc.)</param>
-        public static void CaptureAllScreensToFile(string filePath, ImageFormat format = null)
+        public static void CaptureAllScreensToFile(string filePath, ImageFormat? format = null) // Fix CS8625
         {
-            format = format ?? ImageFormat.Png;
+            format ??= ImageFormat.Png; // Use null-coalescing assignment
 
             using (Bitmap bitmap = CaptureAllScreens())
             {
@@ -258,14 +303,76 @@ namespace AISupporter.App.Helper
         /// <param name="screenIndex">Screen index to capture</param>
         /// <param name="filePath">Path where to save the screenshot</param>
         /// <param name="format">Image format (PNG, JPEG, etc.)</param>
-        public static void CaptureSpecificScreenToFile(int screenIndex, string filePath, ImageFormat format = null)
+        public static void CaptureSpecificScreenToFile(int screenIndex, string filePath, ImageFormat? format = null) // Fix CS8625
         {
-            format = format ?? ImageFormat.Png;
+            format ??= ImageFormat.Png; // Use null-coalescing assignment
 
             using (Bitmap bitmap = CaptureSpecificScreen(screenIndex))
             {
                 bitmap.Save(filePath, format);
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Gets display names using EnumDisplayDevices
+        /// </summary>
+        /// <returns>Dictionary of device names</returns>
+        private static Dictionary<string, string> GetDisplayNames()
+        {
+            var displayNames = new Dictionary<string, string>();
+            var displayDevice = new DISPLAY_DEVICE();
+            displayDevice.cb = Marshal.SizeOf(displayDevice);
+
+            for (uint deviceNum = 0; EnumDisplayDevices(null, deviceNum, ref displayDevice, 0); deviceNum++)
+            {
+                if ((displayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) != 0)
+                {
+                    // Get the monitor name for this display adapter
+                    var monitorDevice = new DISPLAY_DEVICE();
+                    monitorDevice.cb = Marshal.SizeOf(monitorDevice);
+
+                    if (EnumDisplayDevices(displayDevice.DeviceName, 0, ref monitorDevice, EDD_GET_DEVICE_INTERFACE_NAME))
+                    {
+                        displayNames[displayDevice.DeviceName] = monitorDevice.DeviceString ?? "Unknown Monitor";
+                    }
+                    else
+                    {
+                        // Fallback to adapter name if monitor name not available
+                        displayNames[displayDevice.DeviceName] = displayDevice.DeviceString ?? "Unknown Display";
+                    }
+                }
+            }
+
+            return displayNames;
+        }
+
+        /// <summary>
+        /// Cleans up display names by removing unnecessary text
+        /// </summary>
+        /// <param name="name">Raw display name</param>
+        /// <returns>Cleaned display name</returns>
+        private static string CleanDisplayName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return "Unknown Monitor";
+
+            // Remove common unnecessary text
+            name = name.Replace("Generic PnP Monitor", "Generic Monitor")
+                      .Replace("(Digital)", "")
+                      .Replace("(Analog)", "")
+                      .Trim();
+
+            // If the name is still generic, try to make it more descriptive
+            if (name.Contains("Generic"))
+            {
+                name = name.Replace("Generic Monitor", "Display");
+            }
+
+            return name;
         }
 
         #endregion
