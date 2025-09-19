@@ -14,28 +14,28 @@
         <localConverters:MessageAlignmentConverter x:Key="MessageAlignmentConverter"/>
         <localConverters:MessageBackgroundConverter x:Key="MessageBackgroundConverter"/>
         <localConverters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <localConverters:MarkdownToFlowDocumentConverter x:Key="MarkdownConverter"/>
 
         <!-- Chat message template -->
-        <!-- Chat message template -->
         <DataTemplate x:Key="ChatMessageTemplate">
-            <Border Margin="10,5" 
-                    Padding="12,8" 
-                    CornerRadius="12"
-                    MaxWidth="600"
-                    HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
-                    Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
+            <Border Margin="8,3"  
+            Padding="10,6"  
+            CornerRadius="12"
+            MaxWidth="600"
+            HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
+            Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
                 <StackPanel>
                     <!-- Message header -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
                         <TextBlock Text="{Binding Role}" 
-                                   FontWeight="Bold" 
-                                   FontSize="11" 
-                                   Opacity="0.7"/>
+                           FontWeight="Bold" 
+                           FontSize="11" 
+                           Opacity="0.7"/>
                         <!-- Small screenshot icon after text -->
-                        <Button Background="Transparent" BorderThickness="0" Padding="2"
+                        <Button Background="Transparent" BorderThickness="0" Padding="1"
                                 ToolTip="Click to view screenshot"
                                 Click="ScreenshotIcon_Click"
-                                Margin="0,0,0,0"
+                                Margin="3,0,0,0"
                                 VerticalAlignment="Center">
                             <Button.Style>
                                 <Style TargetType="Button">
@@ -48,23 +48,18 @@
                                 </Style>
                             </Button.Style>
                             <Image Width="16" Height="16"
-                                    Source="pack://application:,,,/Resources/Images/screenshot.png"
-                                    Stretch="Uniform"/>
+                           Source="pack://application:,,,/Resources/Images/screenshot.png"
+                           Stretch="Uniform"/>
                         </Button>
                         <TextBlock Text="{Binding ChatTime, StringFormat='HH:mm:ss'}" 
-                                   FontSize="10" 
-                                   Opacity="0.5" 
-                                   Margin="10,0,0,0"/>
+                           FontSize="10" 
+                           Opacity="0.5" 
+                           Margin="8,0,0,0"/>
                     </StackPanel>
 
-                    <!-- Message content with inline image icon -->
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Content}" 
-                                   TextWrapping="Wrap" 
-                                   FontSize="13"
-                                   LineHeight="18"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <!-- Message content - Clean markdown display -->
+                    <ContentPresenter Content="{Binding Content, Converter={StaticResource MarkdownConverter}}" 
+                              Margin="0,2,0,0" />
 
                 </StackPanel>
             </Border>
@@ -83,11 +78,11 @@
         <!-- Chat Messages Container -->
         <Border Grid.Row="1" Background="#fafafa">
             <ScrollViewer x:Name="ChatScrollViewer" 
-                          VerticalScrollBarVisibility="Auto" 
-                          HorizontalScrollBarVisibility="Disabled"
-                          Padding="0,10">
+                  VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="0,5">
                 <ItemsControl ItemsSource="{Binding Messages}" 
-                              ItemTemplate="{StaticResource ChatMessageTemplate}"/>
+                      ItemTemplate="{StaticResource ChatMessageTemplate}"/>
             </ScrollViewer>
         </Border>
 
