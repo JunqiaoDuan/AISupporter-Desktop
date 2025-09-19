@@ -2,6 +2,8 @@
 
 **AISupporter-Desktop** is an AI-powered Windows desktop application that helps users troubleshoot and optimize their computers in real time. The app combines advanced screen-sharing with OpenAI Vision to detect issues, provide actionable guidance, and help keep Windows running smoothly.
 
+![image](https://github.com/JunqiaoDuan/AISupporter-Desktop/blob/main/Images/AISupport.png)
+
 ## ✨ Features
 
 - **AI Screen-Sharing Troubleshooter**
