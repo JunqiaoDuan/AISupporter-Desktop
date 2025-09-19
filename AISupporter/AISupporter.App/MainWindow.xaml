@@ -99,7 +99,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" 
+                <TextBox x:Name="MessageTextBox" Grid.Column="0" 
                          Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
@@ -113,9 +113,10 @@
                          BorderThickness="1"
                          Background="#f9f9f9">
                     <TextBox.InputBindings>
-                        <KeyBinding Key="Enter" 
-                                   Modifiers="Ctrl" 
-                                   Command="{Binding SendMessageCommand}"/>
+                        <!-- Ctrl+Enter for multiline -->
+                        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}"/>
+                        <!-- Enter alone to send (add this) -->
+                        <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
 
@@ -124,25 +125,36 @@
                         Command="{Binding SendMessageCommand}"
                         Padding="16,8"
                         Margin="10,0,0,0"
-                        Background="#2196F3"
-                        Foreground="White"
-                        BorderBrush="#2196F3"
-                        FontWeight="SemiBold"
-                        IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}">
+                        FontWeight="SemiBold">
                     <Button.Style>
                         <Style TargetType="Button">
+                            <!-- Default enabled state -->
+                            <Setter Property="Background" Value="#2196F3"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="BorderBrush" Value="#2196F3"/>
                             <Setter Property="Opacity" Value="1"/>
                             <Style.Triggers>
+                                <!-- When sending -->
                                 <DataTrigger Binding="{Binding IsSending}" Value="True">
                                     <Setter Property="Content" Value="⏳ Sending..."/>
                                     <Setter Property="Opacity" Value="0.6"/>
+                                    <Setter Property="Background" Value="#FFA726"/>
+                                    <Setter Property="BorderBrush" Value="#FFA726"/>
                                 </DataTrigger>
+                                <!-- When disabled (no message or sending) -->
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="#E0E0E0"/>
+                                    <Setter Property="Foreground" Value="#9E9E9E"/>
+                                    <Setter Property="BorderBrush" Value="#BDBDBD"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                </Trigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
             </Grid>
         </Border>
+
     </Grid>
 
 </Window>

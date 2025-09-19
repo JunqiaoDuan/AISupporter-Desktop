@@ -134,17 +134,28 @@ namespace AISupporter.App.ViewModels
                 Messages.Add(AIChatMessage.CreateUserMessage(userMessage, screenshotPath));
                 CurrentMessage = string.Empty;
 
+                // Add "AI is thinking" message
+                var thinkingMessage = AIChatMessage.CreateSystemMessage("🤔 AI is analyzing your request...");
+                Messages.Add(thinkingMessage);
+
                 // Get AI response
                 var modelProvider = await _aiModelService.GetDefaultModel("");
                 if (modelProvider != null)
                 {
                     var aiService = _aiServiceFactory.GetService(modelProvider.Provider);
                     var messageList = Messages.ToList();
-                    await aiService.ChatAsync(messageList, modelProvider.Code);
+
+                    // Remove the "thinking" message from the list we send to AI
+                    var messagesForAI = messageList.Where(m => m.Content != "🤔 AI is analyzing your request...").ToList();
+
+                    await aiService.ChatAsync(messagesForAI, modelProvider.Code);
+
+                    // Remove the "thinking" message from UI and add real response
+                    Messages.Remove(thinkingMessage);
 
                     // Update the collection with new messages
                     Messages.Clear();
-                    foreach (var msg in messageList)
+                    foreach (var msg in messagesForAI)
                     {
                         Messages.Add(msg);
                     }
@@ -152,6 +163,11 @@ namespace AISupporter.App.ViewModels
             }
             catch (Exception ex)
             {
+                // Remove thinking message if there was an error
+                var thinkingMsg = Messages.FirstOrDefault(m => m.Content == "🤔 AI is analyzing your request...");
+                if (thinkingMsg != null)
+                    Messages.Remove(thinkingMsg);
+
                 MessageBox.Show($"Error sending message: {ex.Message}");
             }
             finally

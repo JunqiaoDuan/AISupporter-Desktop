@@ -13,8 +13,15 @@ namespace AISupporter.App
         public MainWindow(MainWindowViewModel viewModel)
         {
             InitializeComponent();
-
             DataContext = viewModel;
+        }
+
+        // Add this method to set focus when window is loaded
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+            // Focus the input textbox when window loads
+            MessageTextBox.Focus();
         }
 
         private void ScreenshotIcon_Click(object sender, RoutedEventArgs e)
@@ -32,11 +39,10 @@ namespace AISupporter.App
         {
             try
             {
-                // This opens the image with Windows default viewer (Photos app, etc.)
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = imagePath,
-                    UseShellExecute = true // This is key for opening with default application
+                    UseShellExecute = true
                 });
             }
             catch (Exception ex)
@@ -44,6 +50,5 @@ namespace AISupporter.App
                 MessageBox.Show($"Could not open image: {ex.Message}");
             }
         }
-
     }
 }
