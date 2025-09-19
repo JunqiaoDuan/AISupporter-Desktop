@@ -35,6 +35,16 @@ namespace AISupporter.App
             }
         }
 
+        private void ChatItemsControl_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            // Forward the mouse wheel event to the parent ScrollViewer
+            if (ChatScrollViewer != null)
+            {
+                ChatScrollViewer.ScrollToVerticalOffset(ChatScrollViewer.VerticalOffset - e.Delta);
+                e.Handled = true;
+            }
+        }
+
         private void OpenWithDefaultViewer(string imagePath)
         {
             try

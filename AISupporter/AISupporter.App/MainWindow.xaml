@@ -77,12 +77,14 @@
 
         <!-- Chat Messages Container -->
         <Border Grid.Row="1" Background="#fafafa">
-            <ScrollViewer x:Name="ChatScrollViewer" 
-                  VerticalScrollBarVisibility="Auto" 
-                  HorizontalScrollBarVisibility="Disabled"
-                  Padding="0,5">
-                <ItemsControl ItemsSource="{Binding Messages}" 
-                      ItemTemplate="{StaticResource ChatMessageTemplate}"/>
+            <ScrollViewer x:Name="ChatScrollViewer"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,5">
+                <ItemsControl x:Name="ChatItemsControl"
+                              ItemsSource="{Binding Messages}"
+                              ItemTemplate="{StaticResource ChatMessageTemplate}"
+                              PreviewMouseWheel="ChatItemsControl_PreviewMouseWheel"/>
             </ScrollViewer>
         </Border>
 

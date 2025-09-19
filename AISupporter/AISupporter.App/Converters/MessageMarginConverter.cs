@@ -18,9 +18,9 @@ namespace AISupporter.App.Converters
             {
                 return role switch
                 {
-                    AIChatMessageRole.User => new Thickness(60, 3, 8, 3),
-                    AIChatMessageRole.Assistant => new Thickness(8, 3, 60, 3),
-                    AIChatMessageRole.System => new Thickness(8, 3, 60, 3),
+                    AIChatMessageRole.User => new Thickness(40, 3, 8, 3),
+                    AIChatMessageRole.Assistant => new Thickness(8, 3, 40, 3),
+                    AIChatMessageRole.System => new Thickness(8, 3, 40, 3),
                     _ => new Thickness(8, 3, 8, 3)
                 };
             }
