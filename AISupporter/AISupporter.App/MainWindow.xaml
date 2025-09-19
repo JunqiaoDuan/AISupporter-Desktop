@@ -91,23 +91,24 @@
         <!-- Input Area -->
         <Border Grid.Row="2" Background="White" BorderBrush="#ddd" BorderThickness="0,1,0,0">
             <StackPanel Margin="15,12" Orientation="Vertical" >
-                <!-- Input TextBox (single line) -->
+                <!-- Input TextBox (multiple lines) -->
                 <TextBox x:Name="MessageTextBox"
                          Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
-                         TextWrapping="NoWrap"
-                         VerticalContentAlignment="Center"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Top"
                          Padding="12,8"
                          FontSize="13"
                          BorderBrush="#ddd"
                          BorderThickness="1"
                          Background="#f9f9f9"
-                         MinHeight="36"
-                         MaxHeight="36"
+                         MinHeight="72"
+                         MaxHeight="72"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         AcceptsReturn="False">
+                         AcceptsReturn="True">
                     <TextBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
+                        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
 
