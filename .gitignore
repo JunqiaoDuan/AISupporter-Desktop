@@ -380,11 +380,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -405,3 +400,6 @@ FodyWeavers.xsd
 
 appsettings.json
 !appsettings.template.json
+temp_auto_push.bat
+temp_interactive_push.bat
+branch_structure.json
