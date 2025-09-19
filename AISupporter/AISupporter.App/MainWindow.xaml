@@ -20,23 +20,23 @@
         <!-- Chat message template -->
         <DataTemplate x:Key="ChatMessageTemplate">
             <Border Margin="{Binding Role, Converter={StaticResource MessageMarginConverter}}"
-                Padding="10,6"  
-                CornerRadius="12"
-                HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
-                Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
+                    Padding="10,6"  
+                    CornerRadius="12"
+                    HorizontalAlignment="{Binding Role, Converter={StaticResource MessageAlignmentConverter}}"
+                    Background="{Binding Role, Converter={StaticResource MessageBackgroundConverter}}">
                 <StackPanel>
                     <!-- Message header -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
                         <TextBlock Text="{Binding Role}" 
-                               FontWeight="Bold" 
-                               FontSize="11" 
-                               Opacity="0.7"/>
+                                   FontWeight="Bold" 
+                                   FontSize="11" 
+                                   Opacity="0.7"/>
                         <!-- Small screenshot icon after text -->
                         <Button Background="Transparent" BorderThickness="0" Padding="1"
-                            ToolTip="Click to view screenshot"
-                            Click="ScreenshotIcon_Click"
-                            Margin="3,0,0,0"
-                            VerticalAlignment="Center">
+                                ToolTip="Click to view screenshot"
+                                Click="ScreenshotIcon_Click"
+                                Margin="3,0,0,0"
+                                VerticalAlignment="Center">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -48,18 +48,18 @@
                                 </Style>
                             </Button.Style>
                             <Image Width="16" Height="16"
-                               Source="pack://application:,,,/Resources/Images/screenshot.png"
-                               Stretch="Uniform"/>
+                                   Source="pack://application:,,,/Resources/Images/screenshot.png"
+                                   Stretch="Uniform"/>
                         </Button>
                         <TextBlock Text="{Binding ChatTime, StringFormat='HH:mm:ss'}" 
-                               FontSize="10" 
-                               Opacity="0.5" 
-                               Margin="8,0,0,0"/>
+                                   FontSize="10" 
+                                   Opacity="0.5" 
+                                   Margin="8,0,0,0"/>
                     </StackPanel>
 
                     <!-- Message content - Clean markdown display -->
                     <ContentPresenter Content="{Binding Content, Converter={StaticResource MarkdownConverter}}" 
-                                  Margin="0,2,0,0" />
+                                        Margin="0,2,0,0" />
 
                 </StackPanel>
             </Border>
@@ -90,68 +90,91 @@
 
         <!-- Input Area -->
         <Border Grid.Row="2" Background="White" BorderBrush="#ddd" BorderThickness="0,1,0,0">
-            <Grid Margin="15,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBox x:Name="MessageTextBox" Grid.Column="0" 
+            <StackPanel Margin="15,12" Orientation="Vertical" >
+                <!-- Input TextBox (single line) -->
+                <TextBox x:Name="MessageTextBox"
                          Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         MaxHeight="120"
-                         MinHeight="36"
-                         VerticalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"
                          VerticalContentAlignment="Center"
                          Padding="12,8"
                          FontSize="13"
                          BorderBrush="#ddd"
                          BorderThickness="1"
-                         Background="#f9f9f9">
+                         Background="#f9f9f9"
+                         MinHeight="36"
+                         MaxHeight="36"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         AcceptsReturn="False">
                     <TextBox.InputBindings>
-                        <!-- Ctrl+Enter for multiline -->
-                        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}"/>
-                        <!-- Enter alone to send (add this) -->
                         <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
 
-                <Button Grid.Column="1" 
-                        Content="📤 Send" 
-                        Command="{Binding SendMessageCommand}"
-                        Padding="16,8"
-                        Margin="10,0,0,0"
-                        FontWeight="SemiBold">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <!-- Default enabled state -->
-                            <Setter Property="Background" Value="#2196F3"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderBrush" Value="#2196F3"/>
-                            <Setter Property="Opacity" Value="1"/>
-                            <Style.Triggers>
-                                <!-- When sending -->
-                                <DataTrigger Binding="{Binding IsSending}" Value="True">
-                                    <Setter Property="Content" Value="⏳ Sending..."/>
-                                    <Setter Property="Opacity" Value="0.6"/>
-                                    <Setter Property="Background" Value="#FFA726"/>
-                                    <Setter Property="BorderBrush" Value="#FFA726"/>
-                                </DataTrigger>
-                                <!-- When disabled (no message or sending) -->
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Background" Value="#E0E0E0"/>
-                                    <Setter Property="Foreground" Value="#9E9E9E"/>
-                                    <Setter Property="BorderBrush" Value="#BDBDBD"/>
-                                    <Setter Property="Opacity" Value="1"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
-        </Border>
+                <!-- Toolbar: Screen dropdown and Send button -->
+                <!-- Toolbar: Screen dropdown and Send button -->
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <!-- Spacer -->
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="ScreenSelector"
+                              ItemsSource="{Binding AvailableScreens}"
+                              SelectedItem="{Binding SelectedScreen, Mode=TwoWay}"
+                              DisplayMemberPath="DeviceName"
+                              MinWidth="120"
+                              Height="36"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Grid.Column="1">
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox">
+                                <Setter Property="Padding" Value="8,0"/>
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
 
+
+                    <Button Content="📤 Send"
+                            Command="{Binding SendMessageCommand}"
+                            Padding="16,0"
+                            FontWeight="SemiBold"
+                            MinWidth="80"
+                            Height="36"
+                            VerticalAlignment="Center"
+                            Grid.Column="2"
+                            IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#2196F3"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#2196F3"/>
+                                <Setter Property="Opacity" Value="1"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSending}" Value="True">
+                                        <Setter Property="Content" Value="⏳ Sending..."/>
+                                        <Setter Property="Opacity" Value="0.6"/>
+                                        <Setter Property="Background" Value="#FFA726"/>
+                                        <Setter Property="BorderBrush" Value="#FFA726"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Background" Value="#E0E0E0"/>
+                                        <Setter Property="Foreground" Value="#9E9E9E"/>
+                                        <Setter Property="BorderBrush" Value="#BDBDBD"/>
+                                        <Setter Property="Opacity" Value="1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+            </StackPanel>
+        </Border>
     </Grid>
 
 </Window>

@@ -27,6 +27,14 @@ namespace AISupporter.App.ViewModels
         private string _currentMessage = string.Empty;
         private bool _isSending = false;
 
+        public ObservableCollection<ScreenCaptureHelper.ScreenInfo> AvailableScreens { get; }
+        private ScreenCaptureHelper.ScreenInfo? _selectedScreen;
+        public ScreenCaptureHelper.ScreenInfo? SelectedScreen
+        {
+            get => _selectedScreen;
+            set { _selectedScreen = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<AIChatMessage> Messages
         {
             get => _messages;
@@ -67,6 +75,9 @@ namespace AISupporter.App.ViewModels
             SendMessageCommand = new AsyncRelayCommand(
                 ExecuteSendMessage,
                 () => !IsSending && !string.IsNullOrWhiteSpace(CurrentMessage));
+
+            AvailableScreens = new ObservableCollection<ScreenCaptureHelper.ScreenInfo>(ScreenCaptureHelper.GetAllScreenInfo());
+            SelectedScreen = AvailableScreens.FirstOrDefault();
         }
 
         #endregion
@@ -192,7 +203,8 @@ namespace AISupporter.App.ViewModels
 
                     using (var allScreensBitmap = ScreenCaptureHelper.CaptureAllScreens())
                     {
-                        ScreenCaptureHelper.CaptureAllScreensToFile(targetFilePath);
+                        var screenIndex = SelectedScreen?.Index ?? 0;
+                        ScreenCaptureHelper.CaptureSpecificScreenToFile(screenIndex, targetFilePath);
                     }
                     return targetFilePath;
                 }
